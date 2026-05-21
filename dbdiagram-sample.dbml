@@ -1,0 +1,213 @@
+// E-Commerce Platform - Sample Database Diagram
+// Mô hình hoàn chỉnh cho một nền tảng bán hàng online
+
+Table Users {
+  id UUID [pk]
+  username String [unique, not null]
+  email String [unique, not null]
+  password String [not null]
+  firstName String
+  lastName String
+  phoneNumber String
+  avatar String
+  role String [note: 'customer, seller, admin']
+  isActive Boolean [default: true]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Address {
+  id UUID [pk]
+  userId UUID [not null]
+  addressType String [note: 'billing, shipping']
+  street String [not null]
+  ward String
+  district String
+  city String [not null]
+  postalCode String
+  country String [not null]
+  isDefault Boolean
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Category {
+  id UUID [pk]
+  categoryName String [unique, not null]
+  description Text
+  image String
+  slug String [unique]
+  isActive Boolean [default: true]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Product {
+  id UUID [pk]
+  categoryId UUID [not null]
+  sellerId UUID [not null]
+  productName String [not null]
+  description Text
+  sku String [unique, not null]
+  price Decimal [not null]
+  discountPrice Decimal
+  stock Integer [not null]
+  image String
+  rating Float
+  isFeatured Boolean [default: false]
+  isActive Boolean [default: true]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table ProductImage {
+  id UUID [pk]
+  productId UUID [not null]
+  imageUrl String [not null]
+  altText String
+  displayOrder Integer
+  createdAt DateTime
+}
+
+Table ProductReview {
+  id UUID [pk]
+  productId UUID [not null]
+  userId UUID [not null]
+  rating Integer [not null, note: '1-5']
+  reviewText Text
+  isVerifiedPurchase Boolean
+  helpful Integer [default: 0]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Cart {
+  id UUID [pk]
+  userId UUID [not null]
+  totalItems Integer [default: 0]
+  totalPrice Decimal [default: 0]
+  lastUpdated DateTime
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table CartItem {
+  id UUID [pk]
+  cartId UUID [not null]
+  productId UUID [not null]
+  quantity Integer [not null]
+  unitPrice Decimal [not null]
+  subtotal Decimal [not null]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Order {
+  id UUID [pk]
+  userId UUID [not null]
+  orderNumber String [unique, not null]
+  shippingAddressId UUID [not null]
+  billingAddressId UUID [not null]
+  orderDate DateTime [not null]
+  totalAmount Decimal [not null]
+  discountAmount Decimal [default: 0]
+  shippingCost Decimal [default: 0]
+  taxAmount Decimal [default: 0]
+  status String [note: 'pending, processing, shipped, delivered, cancelled']
+  shippingTracker String
+  notes Text
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table OrderItem {
+  id UUID [pk]
+  orderId UUID [not null]
+  productId UUID [not null]
+  quantity Integer [not null]
+  unitPrice Decimal [not null]
+  subtotal Decimal [not null]
+  createdAt DateTime
+}
+
+Table Payment {
+  id UUID [pk]
+  orderId UUID [not null, unique]
+  paymentMethod String [note: 'credit_card, debit_card, paypal, bank_transfer']
+  paymentStatus String [note: 'pending, completed, failed, refunded']
+  amount Decimal [not null]
+  transactionId String [unique]
+  paymentDate DateTime
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Coupon {
+  id UUID [pk]
+  code String [unique, not null]
+  discountType String [note: 'percentage, fixed']
+  discountValue Decimal [not null]
+  minOrderAmount Decimal
+  maxUses Integer
+  currentUses Integer [default: 0]
+  expiryDate DateTime
+  isActive Boolean [default: true]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Inventory {
+  id UUID [pk]
+  productId UUID [not null, unique]
+  quantityInStock Integer [not null]
+  quantityReserved Integer [default: 0]
+  lastRestockDate DateTime
+  reorderLevel Integer [note: 'minimum stock to reorder']
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Shipping {
+  id UUID [pk]
+  orderId UUID [not null, unique]
+  shippingMethod String [note: 'standard, express, overnight']
+  trackingNumber String
+  estimatedDeliveryDate DateTime
+  actualDeliveryDate DateTime
+  carrier String
+  shippingStatus String [note: 'pending, in_transit, delivered']
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Admin {
+  id UUID [pk]
+  username String [unique, not null]
+  email String [unique, not null]
+  fullname String [not null]
+  isLocalUser Boolean
+  permissions String [note: 'JSON array of permissions']
+  isActive Boolean [default: true]
+  lastLogin DateTime
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+// Relationships
+Ref: Address.userId > Users.id [delete: cascade]
+Ref: Product.categoryId > Category.id
+Ref: Product.sellerId > Users.id
+Ref: ProductImage.productId > Product.id [delete: cascade]
+Ref: ProductReview.productId > Product.id [delete: cascade]
+Ref: ProductReview.userId > Users.id [delete: cascade]
+Ref: Cart.userId > Users.id [delete: cascade]
+Ref: CartItem.cartId > Cart.id [delete: cascade]
+Ref: CartItem.productId > Product.id
+Ref: Order.userId > Users.id
+Ref: Order.shippingAddressId > Address.id
+Ref: Order.billingAddressId > Address.id
+Ref: OrderItem.orderId > Order.id [delete: cascade]
+Ref: OrderItem.productId > Product.id
+Ref: Payment.orderId > Order.id [delete: cascade]
+Ref: Inventory.productId > Product.id [delete: cascade]
+Ref: Shipping.orderId > Order.id [delete: cascade]

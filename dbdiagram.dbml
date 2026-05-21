@@ -1,0 +1,62 @@
+// E-Commerce Database Diagram
+// Created with dbdiagram.io
+
+Table Admin {
+  id UUID [pk]
+  fullname String [not null]
+  email String [not null, unique]
+  isLocalUser Boolean
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table User {
+  id UUID [pk]
+  fullName String [not null]
+  email String [not null, unique]
+  phoneNumber String
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Product {
+  id UUID [pk]
+  productName String [not null]
+  description Text
+  price Decimal [not null]
+  category String
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Cart {
+  id UUID [pk]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table Order {
+  id UUID [pk]
+  userId UUID [not null]
+  orderNumber String [not null, unique]
+  orderDate DateTime [not null]
+  totalAmount Decimal [not null]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+Table OrderItem {
+  id UUID [pk]
+  orderId UUID [not null]
+  productId UUID [not null]
+  quantity Integer [not null]
+  unitPrice Decimal [not null]
+  subtotal Decimal [not null]
+  createdAt DateTime
+  updatedAt DateTime
+}
+
+// Relationships
+Ref: Order.userId > User.id
+Ref: OrderItem.orderId > Order.id
+Ref: OrderItem.productId > Product.id
