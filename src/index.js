@@ -39,8 +39,18 @@ const startServer = async () => {
     await sequelize.sync();
     console.log('Database synchronized');
     
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
+    });
+
+    // Graceful handler for listen errors (e.g. EADDRINUSE)
+    server.on('error', (err) => {
+      if (err && err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use. Stop the other process or set a different PORT.`);
+        process.exit(1);
+      }
+      console.error('Server error:', err);
+      process.exit(1);
     });
   } catch (error) {
     console.error('Error starting server:', error);
